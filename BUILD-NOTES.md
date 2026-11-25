@@ -68,9 +68,9 @@ Hermes' BUILD-NOTES draft claimed checks it did not demonstrably run (e.g. "Mobi
 |------|-------|--------|
 | Record demo video | Toni | ⏳ Pending |
 | Submit to Devpost | Toni | ⏳ Pending |
-| Push to GitHub (agusher21/reflex-rush-cloud9-reaction-drill) | Coordinator | ⏳ After this |
-| Enable GitHub Pages | Coordinator | ⏳ After push |
-| Verify live Pages URL | Coordinator | ⏳ After Pages |
+| Push to GitHub (agusher21/reflex-rush-cloud9-reaction-drill) | Coordinator | ✅ Done 25 Nov 2026 — commit `3dfd59f`, repo PUBLIC |
+| Enable GitHub Pages | Coordinator | ✅ Done 25 Nov 2026 — status `built` |
+| Verify live Pages URL | Coordinator | ✅ Done 25 Nov 2026 — HTTP 200, 22,693 B, title verified |
 
 ---
 
