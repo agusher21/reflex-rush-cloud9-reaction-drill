@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reflex Rush — Cloud9 Reaction Drill</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%2300b4ff'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23060a12'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --c9-blue: #00b4ff;
+      --c9-blue-glow: rgba(0, 180, 255, 0.6);
+      --c9-dark: #0a0f1a;
+      --c9-darker: #060a12;
+      --c9-card: #111827;
+      --c9-text: #e8f4fd;
+      --c9-muted: #6b8ba4;
+      --red: #ff3b3b;
+      --green: #00ff88;
+      --yellow: #ffd700;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--c9-darker);
+      color: var(--c9-text);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 180, 255, 0.08) 0%, transparent 70%),
+        radial-gradient(circle at 50% 100%, rgba(0, 180, 255, 0.05) 0%, transparent 60%),
+        var(--c9-darker);
+    }
+
+    /* Screens */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 720px;
+      padding: clamp(20px, 5vw, 40px);
+      text-align: center;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* Start Screen */
+    .logo {
+      font-size: clamp(28px, 6vw, 48px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--c9-blue) 0%, #007acc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .tagline {
+      font-size: clamp(14px, 3vw, 18px);
+      color: var(--c9-muted);
+      margin-bottom: clamp(24px, 5vw, 40px);
+      font-weight: 400;
+    }
+
+    .howto {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: clamp(24px, 5vw, 40px);
+      padding: 0 20px;
+    }
+
+    .howto-line {
+      font-size: clamp(13px, 2.5vw, 16px);
+      color: var(--c9-text);
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    .howto-line strong {
+      color: var(--c9-blue);
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      border-radius: 16px;
+      font-size: clamp(18px, 4vw, 24px);
+      font-weight: 700;
+      padding: clamp(16px, 3vw, 22px) clamp(32px, 8vw, 56px);
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, var(--c9-blue) 0%, #007acc 100%);
+      color: #060a12;
+      box-shadow:
+        0 8px 24px var(--c9-blue-glow),
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary:hover {
+      box-shadow:
+        0 12px 32px var(--c9-blue-glow),
+        0 6px 16px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary {
+      background: var(--c9-card);
+      color: var(--c9-text);
+      border: 2px solid rgba(0, 180, 255, 0.3);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--c9-blue);
+      box-shadow:
+        0 8px 24px rgba(0, 180, 255, 0.2),
+        0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Leaderboard Preview */
+    .leaderboard-preview {
+      margin-top: clamp(16px, 4vw, 28px);
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .leaderboard-title {
+      font-size: clamp(13px, 2.5vw, 15px);
+      color: var(--c9-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+
+    .lb-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--c9-card);
+      border-radius: 12px;
+      padding: 12px 16px;
+      border: 1px solid rgba(0, 180, 255, 0.1);
+    }
+
+    .lb-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: clamp(12px, 2.2vw, 14px);
+    }
+
+    .lb-rank {
+      color: var(--c9-blue);
+      font-weight: 700;
+      min-width: 28px;
+    }
+
+    .lb-initials {
+      font-weight: 600;
+      color: var(--c9-text);
+    }
+
+    .lb-score {
+      color: var(--c9-muted);
+      font-variant-numeric: tabular-nums;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .lb-empty {
+      color: var(--c9-muted);
+      font-size: clamp(12px, 2.2vw, 14px);
+      padding: 16px 0;
+    }
+
+    /* Game Screen */
+    .game-screen {
+      position: relative;
+    }
+
+    .round-info {
+      position: absolute;
+      top: clamp(16px, 3vw, 24px);
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(14px, 3vw, 18px);
+      color: var(--c9-muted);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .reaction-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 300px;
+      transition: background-color 0.1s ease;
+    }
+
+    .reaction-area.waiting {
+      background: var(--c9-darker);
+    }
+
+    .reaction-area.ready {
+      background: var(--green);
+    }
+
+    .reaction-area.false-start {
+      background: var(--red);
+      animation: falseFlash 0.15s ease 3;
+    }
+
+    @keyframes falseFlash {
+      0%, 100% { background: var(--red); }
+      50% { background: #ff6b6b; }
+    }
+
+    .instruction {
+      font-size: clamp(20px, 5vw, 32px);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+    }
+
+    .instruction.waiting {
+      color: var(--c9-text);
+    }
+
+    .instruction.ready {
+      color: #060a12;
+    }
+
+    .instruction.false-start {
+      color: #fff;
+    }
+
+    .ms-display {
+      font-size: clamp(28px, 7vw, 56px);
+      font-weight: 800;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-variant-numeric: tabular-nums;
+      margin-top: 16px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .ms-display.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .ms-display.best {
+      color: var(--yellow);
+    }
+
+    /* Results Screen */
+    .results-screen {
+      gap: clamp(16px, 3vw, 24px);
+    }
+
+    .results-title {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 800;
+      color: var(--c9-blue);
+      margin-bottom: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 8px;
+    }
+
+    .stat-card {
+      background: var(--c9-card);
+      border: 1px solid rgba(0, 180, 255, 0.15);
+      border-radius: 16px;
+      padding: clamp(16px, 3vw, 20px);
+    }
+
+    .stat-label {
+      font-size: clamp(11px, 2vw, 13px);
+      color: var(--c9-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 800;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-variant-numeric: tabular-nums;
+      color: var(--c9-text);
+    }
+
+    .stat-value.best {
+      color: var(--yellow);
+    }
+
+    .rank-display {
+      margin: 8px 0 16px;
+    }
+
+    .rank-label {
+      font-size: clamp(18px, 4vw, 26px);
+      font-weight: 700;
+      color: var(--c9-blue);
+    }
+
+    .rank-sublabel {
+      font-size: clamp(13px, 2.5vw, 16px);
+      color: var(--c9-muted);
+      margin-top: 4px;
+    }
+
+    /* Initials Entry */
+    .initials-entry {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 16px 0 24px;
+    }
+
+    .initial-input {
+      width: clamp(50px, 10vw, 70px);
+      height: clamp(56px, 12vw, 80px);
+      border: none;
+      border-radius: 12px;
+      background: var(--c9-card);
+      color: var(--c9-text);
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      outline: none;
+      border: 2px solid rgba(0, 180, 255, 0.2);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .initial-input:focus {
+      border-color: var(--c9-blue);
+      box-shadow: 0 0 0 4px var(--c9-blue-glow);
+    }
+
+    .initial-input.filled {
+      border-color: var(--c9-blue);
+    }
+
+    /* Full Leaderboard */
+    .full-leaderboard {
+      width: 100%;
+      max-width: 480px;
+      margin-top: 16px;
+    }
+
+    .full-leaderboard .lb-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .full-leaderboard .lb-item:nth-child(1) .lb-rank { color: var(--yellow); }
+    .full-leaderboard .lb-item:nth-child(2) .lb-rank { color: #c0c0c0; }
+    .full-leaderboard .lb-item:nth-child(3) .lb-rank { color: #cd7f32; }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Focus visible for accessibility */
+    .btn:focus-visible,
+    .initial-input:focus-visible {
+      outline: 3px solid var(--c9-blue);
+      outline-offset: 3px;
+    }
+
+    /* Hidden utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Start Screen -->
+  <section id="start-screen" class="screen active" aria-label="Start screen">
+    <h1 class="logo">Reflex Rush</h1>
+    <p class="tagline">Cloud9 Reaction Drill</p>
+
+    <div class="howto" role="list" aria-label="How to play">
+      <p class="howto-line" role="listitem"><strong>Wait</strong> for the screen to turn <strong style="color: var(--green)">GREEN</strong></p>
+      <p class="howto-line" role="listitem"><strong>Click</strong> or press <strong>Space</strong> instantly — 5 rounds</p>
+      <p class="howto-line" role="listitem">Your <strong>average reaction time</strong> decides your rank</p>
+    </div>
+
+    <button id="start-btn" class="btn btn-primary" aria-label="Start game">START</button>
+
+    <div class="leaderboard-preview" aria-labelledby="lb-preview-title">
+      <p class="leaderboard-title" id="lb-preview-title">Top 5 Reaction Times</p>
+      <div class="lb-list" id="lb-preview-list"></div>
+    </div>
+  </section>
+
+  <!-- Game Screen -->
+  <section id="game-screen" class="screen game-screen" aria-label="Game screen" role="region" aria-live="polite">
+    <div class="round-info" aria-live="polite" aria-atomic="true">
+      Round <span id="round-counter">1</span> of 5
+    </div>
+
+    <div id="reaction-area" class="reaction-area waiting" role="button" tabindex="0" aria-label="Reaction area — click or press Space when green">
+      <p id="instruction" class="instruction waiting">Wait for green...</p>
+      <p id="ms-display" class="ms-display" aria-live="polite" aria-atomic="true"></p>
+    </div>
+  </section>
+
+  <!-- Results Screen -->
+  <section id="results-screen" class="screen results-screen" aria-label="Results screen">
+    <h2 class="results-title">Results</h2>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-label">Average</p>
+        <p id="avg-stat" class="stat-value">— ms</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Best</p>
+        <p id="best-stat" class="stat-value best">— ms</p>
+      </div>
+    </div>
+
+    <div class="rank-display">
+      <p id="rank-label" class="rank-label">—</p>
+      <p id="rank-sublabel" class="rank-sublabel">Complete 5 rounds to see your rank</p>
+    </div>
+
+    <div class="initials-entry" aria-label="Enter your initials for the leaderboard">
+      <input type="text" class="initial-input" maxlength="1" aria-label="First initial" data-index="0">
+      <input type="text" class="initial-input" maxlength="1" aria-label="Second initial" data-index="1">
+      <input type="text" class="initial-input" maxlength="1" aria-label="Third initial" data-index="2">
+    </div>
+
+    <button id="save-btn" class="btn btn-primary" disabled aria-label="Save score to leaderboard">SAVE SCORE</button>
+
+    <div class="full-leaderboard" aria-labelledby="full-lb-title">
+      <p class="leaderboard-title" id="full-lb-title">Leaderboard — Top 10</p>
+      <div class="lb-list" id="full-lb-list"></div>
+    </div>
+
+    <button id="play-again-btn" class="btn btn-secondary" style="margin-top: 24px;" aria-label="Play again">PLAY AGAIN</button>
+  </section>
+
+  <script>
+    // ===== STATE & CONFIG =====
+    const CONFIG = {
+      rounds: 5,
+      minDelay: 1200,
+      maxDelay: 4000,
+      rankThresholds: [
+        { max: 179, label: 'Cloud9 Pro', sub: 'Elite reflexes — tournament ready' },
+        { max: 219, label: 'Diamond Hands', sub: 'Lightning fast — top tier' },
+        { max: 259, label: 'Sharp', sub: 'Above average — solid reactions' },
+        { max: 319, label: 'Warming Up', sub: 'Getting there — keep drilling' },
+        { max: Infinity, label: 'Keep Practicing', sub: 'More reps needed — you\'ll improve' }
+      ],
+      leaderboardKey: 'reflex-rush-lb',
+      maxLeaderboardEntries: 10
+    };
+
+    // Game state
+    let state = 'start'; // start, waiting, ready, round-end, results
+    let currentRound = 0;
+    let roundResults = [];
+    let timeoutId = null;
+    let greenTime = 0;
+    let falseStart = false;
+
+    // DOM elements
+    const screens = {
+      start: document.getElementById('start-screen'),
+      game: document.getElementById('game-screen'),
+      results: document.getElementById('results-screen')
+    };
+    const reactionArea = document.getElementById('reaction-area');
+    const instruction = document.getElementById('instruction');
+    const msDisplay = document.getElementById('ms-display');
+    const roundCounter = document.getElementById('round-counter');
+    const avgStat = document.getElementById('avg-stat');
+    const bestStat = document.getElementById('best-stat');
+    const rankLabel = document.getElementById('rank-label');
+    const rankSublabel = document.getElementById('rank-sublabel');
+    const initialInputs = document.querySelectorAll('.initial-input');
+    const saveBtn = document.getElementById('save-btn');
+    const lbPreviewList = document.getElementById('lb-preview-list');
+    const fullLbList = document.getElementById('full-lb-list');
+
+    // ===== UTILITIES =====
+    function showScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+      state = name;
+    }
+
+    function getLeaderboard() {
+      try {
+        const data = localStorage.getItem(CONFIG.leaderboardKey);
+        return data ? JSON.parse(data) : [];
+      } catch { return []; }
+    }
+
+    function saveLeaderboard(entries) {
+      try {
+        localStorage.setItem(CONFIG.leaderboardKey, JSON.stringify(entries));
+      } catch (e) {
+        console.warn('Failed to save leaderboard:', e);
+      }
+    }
+
+    function renderLeaderboard(listEl, entries, maxItems = null) {
+      const items = maxItems ? entries.slice(0, maxItems) : entries;
+      if (items.length === 0) {
+        listEl.innerHTML = '<p class="lb-empty">No scores yet — be the first!</p>';
+        return;
+      }
+      listEl.innerHTML = items.map((entry, i) => `
+        <div class="lb-item">
+          <span class="lb-rank">#${i + 1}</span>
+          <span class="lb-initials">${entry.initials}</span>
+          <span class="lb-score">${entry.avg} ms</span>
+        </div>
+      `).join('');
+    }
+
+    function getRank(avgMs) {
+      for (const t of CONFIG.rankThresholds) {
+        if (avgMs <= t.max) return t;
+      }
+      return CONFIG.rankThresholds[CONFIG.rankThresholds.length - 1];
+    }
+
+    function randomDelay() {
+      return Math.floor(Math.random() * (CONFIG.maxDelay - CONFIG.minDelay + 1)) + CONFIG.minDelay;
+    }
+
+    function formatMs(ms) {
+      return Math.round(ms).toLocaleString();
+    }
+
+    // ===== INITIALS INPUT HANDLING =====
+    initialInputs.forEach((input, idx) => {
+      input.addEventListener('input', () => {
+        input.value = input.value.toUpperCase().replace(/[^A-Z]/g, '');
+        input.classList.toggle('filled', input.value.length === 1);
+        if (input.value.length === 1 && idx < 2) {
+          initialInputs[idx + 1].focus();
+        }
+        updateSaveButton();
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && idx > 0) {
+          initialInputs[idx - 1].focus();
+        }
+        if (e.key === 'Enter') {
+          if (saveBtn.disabled === false) saveScore();
+        }
+      });
+    });
+
+    function getInitials() {
+      return Array.from(initialInputs).map(i => i.value).join('');
+    }
+
+    function clearInitials() {
+      initialInputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
+      initialInputs[0].focus();
+      updateSaveButton();
+    }
+
+    function updateSaveButton() {
+      const initials = getInitials();
+      saveBtn.disabled = initials.length !== 3;
+    }
+
+    // ===== GAME LOGIC =====
+    function startGame() {
+      currentRound = 0;
+      roundResults = [];
+      falseStart = false;
+      nextRound();
+    }
+
+    function nextRound() {
+      if (currentRound >= CONFIG.rounds) {
+        showResults();
+        return;
+      }
+
+      currentRound++;
+      roundCounter.textContent = currentRound;
+      showScreen('game');
+
+      // Reset UI
+      reactionArea.className = 'reaction-area waiting';
+      instruction.className = 'instruction waiting';
+      instruction.textContent = 'Wait for green...';
+      msDisplay.className = 'ms-display';
+      msDisplay.textContent = '';
+
+      // Start waiting phase
+      state = 'waiting';
+      const delay = randomDelay();
+
+      timeoutId = setTimeout(() => {
+        if (state !== 'waiting') return; // False start already handled
+        goGreen();
+      }, delay);
+    }
+
+    function goGreen() {
+      greenTime = performance.now();
+      state = 'ready';
+      reactionArea.className = 'reaction-area ready';
+      instruction.className = 'instruction ready';
+      instruction.textContent = 'CLICK NOW!';
+    }
+
+    function handleClick() {
+      if (state === 'waiting') {
+        // False start
+        falseStart = true;
+        clearTimeout(timeoutId);
+        state = 'false-start';
+        reactionArea.className = 'reaction-area false-start';
+        instruction.className = 'instruction false-start';
+        instruction.textContent = 'FALSE START!';
+        msDisplay.className = 'ms-display';
+        msDisplay.textContent = '';
+
+        // Restart the SAME round after animation (do not consume a round)
+        setTimeout(() => {
+          currentRound--;
+          nextRound();
+        }, 1000);
+        return;
+      }
+
+      if (state !== 'ready') return;
+
+      const reactionTime = performance.now() - greenTime;
+      roundResults.push(reactionTime);
+
+      // Show result
+      state = 'round-end';
+      reactionArea.className = 'reaction-area ready';
+      instruction.className = 'instruction ready';
+      instruction.textContent = `Round ${currentRound} complete`;
+      msDisplay.textContent = `${formatMs(reactionTime)} ms`;
+      msDisplay.className = 'ms-display visible';
+
+      // Next round after brief pause
+      setTimeout(() => {
+        nextRound();
+      }, 1200);
+    }
+
+    function showResults() {
+      const avg = roundResults.reduce((a, b) => a + b, 0) / roundResults.length;
+      const best = Math.min(...roundResults);
+      const rank = getRank(avg);
+
+      showScreen('results');
+      avgStat.textContent = `${formatMs(avg)} ms`;
+      bestStat.textContent = `${formatMs(best)} ms`;
+      rankLabel.textContent = rank.label;
+      rankSublabel.textContent = rank.sub;
+
+      clearInitials();
+      renderLeaderboard(fullLbList, getLeaderboard());
+    }
+
+    function saveScore() {
+      const initials = getInitials();
+      if (initials.length !== 3) return;
+
+      const avg = roundResults.reduce((a, b) => a + b, 0) / roundResults.length;
+      const entry = {
+        initials,
+        avg: Math.round(avg),
+        date: new Date().toISOString().split('T')[0]
+      };
+
+      const lb = getLeaderboard();
+      lb.push(entry);
+      lb.sort((a, b) => a.avg - b.avg);
+      lb.splice(CONFIG.maxLeaderboardEntries);
+      saveLeaderboard(lb);
+
+      renderLeaderboard(lbPreviewList, lb, 5);
+      renderLeaderboard(fullLbList, lb);
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'SAVED!';
+      setTimeout(() => {
+        saveBtn.textContent = 'SAVE SCORE';
+        updateSaveButton();
+      }, 1500);
+    }
+
+    function playAgain() {
+      roundResults = [];
+      currentRound = 0;
+      clearInitials();
+      startGame();
+    }
+
+    // ===== EVENT LISTENERS =====
+    document.getElementById('start-btn').addEventListener('click', startGame);
+    document.getElementById('play-again-btn').addEventListener('click', playAgain);
+    saveBtn.addEventListener('click', saveScore);
+
+    // Click/tap on reaction area
+    reactionArea.addEventListener('click', handleClick);
+    reactionArea.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      handleClick();
+    }, { passive: false });
+
+    // Space key
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (state === 'start') {
+          startGame();
+        } else if (state === 'waiting' || state === 'ready') {
+          handleClick();
+        } else if (state === 'results' && !saveBtn.disabled) {
+          saveScore();
+        }
+      }
+    });
+
+    // Prevent space scroll
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && e.target === document.body) {
+        e.preventDefault();
+      }
+    });
+
+    // ===== INIT =====
+    renderLeaderboard(lbPreviewList, getLeaderboard(), 5);
+    renderLeaderboard(fullLbList, getLeaderboard());
+  </script>
+</body>
+</html>
